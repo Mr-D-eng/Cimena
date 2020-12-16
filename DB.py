@@ -41,14 +41,14 @@ class DbHall:
         self.conn = sqlite3.connect('DataBase.bd')
         self.c = self.conn.cursor()
         self.c.execute(
-            '''CREATE TABLE IF NOT EXISTS Hall(id integer primary key, Title text, FirstColumn text, SecondColumn text, 
-            ThirdColumn text, FourthColumn text)''')
+            '''CREATE TABLE IF NOT EXISTS Hall(id integer primary key, FirstColumn text, SecondColumn text, 
+            ThirdColumn text, FourthColumn text, FifthColumn text)''')
         self.conn.commit()
 
-    def insert_data(self, Title, FirstColumn, SecondColumn, ThirdColumn, FourthColumn):
+    def insert_data(self, FirstColumn, SecondColumn, ThirdColumn, FourthColumn, FifthColumn):
         self.c.execute(
-            '''INSERT INTO Hall( Title, FirstColumn, SecondColumn, ThirdColumn, FourthColumn)
+            '''INSERT INTO Hall(FirstColumn, SecondColumn, ThirdColumn, FourthColumn, FifthColumn)
             VALUES (?, ?, ?, ?, ?)''',
-            (Title, FirstColumn, SecondColumn, ThirdColumn, FourthColumn)
+            (FirstColumn, SecondColumn, ThirdColumn, FourthColumn, FifthColumn)
         )
         self.conn.commit()

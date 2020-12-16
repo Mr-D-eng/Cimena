@@ -16,6 +16,8 @@ class Main(tk.Frame):
         self.view_records_film()
 
     def table(self):
+        if films:
+            
         self.films = ttk.Treeview(self,
                                   columns=('ID', 'Title', 'Genre', 'Age', 'Description', 'Visual'),
                                   height=15,
@@ -50,6 +52,7 @@ class Main(tk.Frame):
         self.btn_add.pack(side=tk.LEFT)
         self.btn_delete.pack(side=tk.LEFT)
         self.btn_exit.pack(side=tk.RIGHT)
+
 
     def table_films(self):
         self.sessions.destroy()
@@ -138,6 +141,54 @@ class Main(tk.Frame):
         self.btn_delete_drug.pack(side=tk.LEFT)
         self.btn_exit_drug.pack(side=tk.RIGHT)
 
+
+    def table_hall(self):
+        self.hall = ttk.Treeview(self,
+                                 columns=('FirstColumn', 'SecondColumn', 'ThirdColumn', 'FourthColumn', 'FifthColumn'),
+                                 height=15,
+                                 show='headings'
+                                 )
+        self.hall.column('FirstColumn', width=200, anchor=tk.CENTER)
+        self.hall.column('SecondColumn', width=200, anchor=tk.CENTER)
+        self.hall.column('ThirdColumn', width=200, anchor=tk.CENTER)
+        self.hall.column('FourthColumn', width=200, anchor=tk.CENTER)
+        self.hall.column('FifthColumn', width=200, anchor=tk.CENTER)
+        self.hall.pack()
+
+        self.btn_add = tk.Button(self, text='Добавить', command=self.add_hall, compound=tk.BOTTOM)
+        self.btn_delete = tk.Button(self, text='Удалить', command=self.delete_hall, compound=tk.BOTTOM)
+        self.btn_exit = tk.Button(self, text='Выход', command=root.destroy, background='red', compound=tk.BOTTOM)
+
+        self.btn_add.pack(side=tk.LEFT)
+        self.btn_delete.pack(side=tk.LEFT)
+        self.btn_exit.pack(side=tk.RIGHT)
+
+    def records_hall(self, FirstColumn, SecondColumn, ThirdColumn, FourthColumn, FifthColumn):
+        self.dbHall.insert_data(FirstColumn, SecondColumn, ThirdColumn, FourthColumn, FifthColumn)
+        self.view_records_hall()
+
+    def update_record_hall(self, FirstColumn, SecondColumn, ThirdColumn, FourthColumn, FifthColumn):
+        self.dbHall.c.execute('''UPDATE Hall SET FirstColumn=?, SecondColumn=?, ThirdColumn=?, FourthColumn=?, FifthColumn=? WHERE ID=?''',
+                               (FirstColumn, SecondColumn, ThirdColumn, FourthColumn, FifthColumn,
+                                self.hall.set(self.hall.selection()[0], '#1'))
+                               )
+        self.dbHall.conn.commit()
+        self.view_records_hall()
+
+    def view_records_hall(self):
+        self.dbHall.c.execute('''SELECT * FROM Hall''')
+        [self.hall.delete(i) for i in self.hall.get_children()]
+        [self.hall.insert('', 'end', values=row) for row in self.dbHall.c.fetchall()]
+
+    def delete_hall(self):
+        for selected_item in self.hall.selection():
+            self.dbHall.c.execute("DELETE FROM Hall WHERE ID=?", (self.hall.set(selected_item, '#1'),))
+            self.dbHall.conn.commit()
+            self.hall.delete(selected_item)
+        self.view_records_hall()
+
+
+
     def records_film(self, Title, Genre, Age, Description, Visual):
         self.dbFilms.insert_data(Title, Genre, Age, Description, Visual)
         self.view_records_film()
@@ -162,7 +213,6 @@ class Main(tk.Frame):
             self.films.delete(selected_item)
         self.view_records_film()
 
-    # Таблица лекарств
     def records_session(self, Title, Date, Time, Tickets, Tickets_sold_out):
         self.dbSessions.insert_data(Title, Date, Time, Tickets, Tickets_sold_out)
         self.view_records_session()
@@ -198,40 +248,14 @@ class Main(tk.Frame):
         AddSession()
 
     @staticmethod
-    def table_hall():
-        HallTable()
-
-
-class HallTable(tk.Toplevel):
-    def __init__(self):
-        super().__init__(root)
-        self.dbHall = dbHall
-        self.table_hall()
-        self.view = app
-
-    def table_hall(self):
-        self.title('Зал')
-        self.resizable(False, False)
-        self.grab_set()
-        self.focus_set()
-
-
-    def records_hall(self, Title, FirstColumn, SecondColumn, ThirdColumn, FourthColumn):
-        self.dbHall.insert_data(Title, FirstColumn, SecondColumn, ThirdColumn, FourthColumn)
-        self.view_records_hall()
-
-    def view_records_hall(self):
-        self.dbHall.c.execute('''SELECT * FROM Hall''')
-        [self.hall.delete(i) for i in self.hall.get_children()]
-        [self.hall.insert('', 'end', values=row) for row in self.dbHall.c.fetchall()]
+    def add_hall():
+        AddHall()
 
 
 class AddSession(tk.Toplevel):
     def __init__(self):
         super().__init__(root)
-        self.dbFilms = dbFilms
         self.dbSessions = dbSessions
-        self.dbHall = dbHall
         self.init_session()
         self.view = app
 
@@ -297,6 +321,9 @@ class AddSession(tk.Toplevel):
         self.cal.destroy()
 
 
+
+
+
 class AddFilm(tk.Toplevel):
     def __init__(self):
         super().__init__(root)
@@ -341,6 +368,53 @@ class AddFilm(tk.Toplevel):
                                                                             self.entry_age.get(),
                                                                             self.entry_description.get(),
                                                                             self.combobox_visual.get(),
+                                                                            ))
+        self.grab_set()
+        self.focus_set()
+
+class AddHall(tk.Toplevel):
+    def __init__(self):
+        super().__init__(root)
+        self.init_hall()
+        self.view = app
+
+    def init_hall(self):
+        self.title('Выбрать место')
+        self.geometry('450x350+400+300')
+        self.resizable(False, False)
+
+        label_first = tk.Label(self, text='1 Место:')
+        label_first.place(x=50, y=10)
+        label_second = tk.Label(self, text='2 Место:')
+        label_second.place(x=50, y=40)
+        label_third = tk.Label(self, text='3 Место:')
+        label_third.place(x=50, y=70)
+        label_fourth = tk.Label(self, text='4 Место:')
+        label_fourth.place(x=50, y=100)
+        label_fifth = tk.Label(self, text='5 Место:')
+        label_fifth.place(x=50, y=130)
+
+        self.entry_first = ttk.Entry(self)
+        self.entry_first.place(x=200, y=10)
+        self.entry_second = ttk.Entry(self)
+        self.entry_second.place(x=200, y=40)
+        self.entry_third = ttk.Entry(self)
+        self.entry_third.place(x=200, y=70)
+        self.entry_fourth = ttk.Entry(self)
+        self.entry_fourth.place(x=200, y=100)
+        self.entry_fifth = ttk.Entry(self)
+        self.entry_fifth.place(x=200, y=130)
+
+        btn_cancel = ttk.Button(self, text='Закрыть', command=self.destroy)
+        btn_cancel.place(x=350, y=320)
+
+        self.btn_ok = ttk.Button(self, text='Добавить')
+        self.btn_ok.place(x=10, y=320)
+        self.btn_ok.bind('<Button-1>', lambda event: self.view.records_hall(self.entry_first.get(),
+                                                                            self.entry_second.get(),
+                                                                            self.entry_third.get(),
+                                                                            self.entry_fourth.get(),
+                                                                            self.entry_fifth.get(),
                                                                             ))
         self.grab_set()
         self.focus_set()
