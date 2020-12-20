@@ -22,7 +22,7 @@ class Main(tk.Frame):
         m.add_cascade(label="Опции", menu=sm)
         sm.add_command(label="Сеансы", command=self.table_sessions)
         sm.add_command(label="Фильмы", command=self.table)
-        sm.add_command(label="Зал", command=self.table_hall)
+        sm.add_command(label="Зал", command=self.check_film)
 
         self.films = ttk.Treeview(self,
                                   columns=('ID', 'Title', 'Genre', 'Age', 'Description', 'Visual'),
@@ -43,7 +43,7 @@ class Main(tk.Frame):
         self.films.heading('Description', text='Описание')
         self.films.heading('Visual', text='2D/3D')
 
-        self.films.grid(row=0, column=0, columnspan=3)
+        self.films.grid(row=0, column=0, columnspan=4)
         self.view_records_film()
 
         self.btn_add = tk.Button(self, text='Добавить', command=self.add_film, compound=tk.BOTTOM)
@@ -52,7 +52,7 @@ class Main(tk.Frame):
 
         self.btn_add.grid(row=1, column=0)
         self.btn_delete.grid(row=1, column=1)
-        self.btn_exit.grid(row=1, column=2)
+        self.btn_exit.grid(row=1, column=3)
 
 
     def table_sessions(self):
@@ -75,7 +75,7 @@ class Main(tk.Frame):
         self.sessions.heading('Tickets', text='Билетов всего')
         self.sessions.heading('Tickets_sold_out', text='Билетов продано')
 
-        self.sessions.grid(row=0, column=0, columnspan=3)
+        self.sessions.grid(row=0, column=0, columnspan=4)
         self.view_records_session()
 
         self.btn_add_drug = tk.Button(self, text='Добавить', command=self.add_session, compound=tk.BOTTOM)
@@ -86,22 +86,34 @@ class Main(tk.Frame):
 
     def table_hall(self):
         self.hall = ttk.Treeview(self,
-                                 columns=('FirstColumn', 'SecondColumn', 'ThirdColumn', 'FourthColumn', 'FifthColumn'),
+                                 columns=('ID', 'FirstColumn', 'SecondColumn', 'ThirdColumn', 'FourthColumn', 'FifthColumn'),
                                  height=15,
                                  show='headings'
                                  )
-        self.hall.column('FirstColumn', width=205, anchor=tk.CENTER)
-        self.hall.column('SecondColumn', width=205, anchor=tk.CENTER)
-        self.hall.column('ThirdColumn', width=205, anchor=tk.CENTER)
-        self.hall.column('FourthColumn', width=205, anchor=tk.CENTER)
-        self.hall.column('FifthColumn', width=205, anchor=tk.CENTER)
-        self.hall.grid(row=0, column=0, columnspan=3)
+        self.hall.column('ID', width=170, anchor=tk.CENTER)
+        self.hall.column('FirstColumn', width=170, anchor=tk.CENTER)
+        self.hall.column('SecondColumn', width=170, anchor=tk.CENTER)
+        self.hall.column('ThirdColumn', width=170, anchor=tk.CENTER)
+        self.hall.column('FourthColumn', width=170, anchor=tk.CENTER)
+        self.hall.column('FifthColumn', width=170, anchor=tk.CENTER)
+
+        self.hall.heading('ID', text='Номер ряда/Номер места')
+        self.hall.heading('FirstColumn', text='1 Место')
+        self.hall.heading('SecondColumn', text='2 Место')
+        self.hall.heading('ThirdColumn', text='3 Место')
+        self.hall.heading('FourthColumn', text='4 Место')
+        self.hall.heading('FifthColumn', text='5 Место')
+
+        self.hall.grid(row=0, column=0, columnspan=4)
+        self.view_records_hall()
 
         self.btn_add = tk.Button(self, text='Добавить', command=self.add_hall, compound=tk.BOTTOM)
+        self.btn_upd = tk.Button(self, text='Редактировать', command=self.update_hall, compound=tk.BOTTOM)
         self.btn_delete = tk.Button(self, text='Удалить', command=self.delete_hall, compound=tk.BOTTOM)
 
         self.btn_add.grid(row=1, column=0)
         self.btn_delete.grid(row=1, column=1)
+        self.btn_upd.grid(row=1, column=2)
     '''Зрительские залы'''
 
     def records_hall(self, FirstColumn, SecondColumn, ThirdColumn, FourthColumn, FifthColumn):
@@ -176,6 +188,14 @@ class Main(tk.Frame):
     def add_hall():
         AddHall()
 
+    @staticmethod
+    def update_hall():
+        UpdateHall()
+
+    @staticmethod
+    def check_film():
+        CheckFilm()
+
 
 class AddSession(tk.Toplevel):
     def __init__(self):
@@ -244,9 +264,6 @@ class AddSession(tk.Toplevel):
         self.date = str(self.ttkcal.selection)
         self.label_date.configure(text=self.date[:10])
         self.cal.destroy()
-
-
-
 
 
 class AddFilm(tk.Toplevel):
@@ -319,31 +336,76 @@ class AddHall(tk.Toplevel):
         label_fifth = tk.Label(self, text='5 Место:')
         label_fifth.place(x=50, y=130)
 
-        self.entry_first = ttk.Entry(self)
-        self.entry_first.place(x=200, y=10)
-        self.entry_second = ttk.Entry(self)
-        self.entry_second.place(x=200, y=40)
-        self.entry_third = ttk.Entry(self)
-        self.entry_third.place(x=200, y=70)
-        self.entry_fourth = ttk.Entry(self)
-        self.entry_fourth.place(x=200, y=100)
-        self.entry_fifth = ttk.Entry(self)
-        self.entry_fifth.place(x=200, y=130)
+        self.combobox_first = ttk.Combobox(self, values=[u'Пусто', 'Занято'])
+        self.combobox_first.current(0)
+        self.combobox_first.place(x=200, y=10)
+        self.combobox_second = ttk.Combobox(self, values=[u'Пусто', 'Занято'])
+        self.combobox_second.current(0)
+        self.combobox_second.place(x=200, y=40)
+        self.combobox_third = ttk.Combobox(self, values=[u'Пусто', 'Занято'])
+        self.combobox_third.current(0)
+        self.combobox_third.place(x=200, y=70)
+        self.combobox_fourth = ttk.Combobox(self, values=[u'Пусто', 'Занято'])
+        self.combobox_fourth.current(0)
+        self.combobox_fourth.place(x=200, y=100)
+        self.combobox_fifth = ttk.Combobox(self, values=[u'Пусто', 'Занято'])
+        self.combobox_fifth.current(0)
+        self.combobox_fifth.place(x=200, y=130)
 
         btn_cancel = ttk.Button(self, text='Закрыть', command=self.destroy)
         btn_cancel.place(x=350, y=320)
 
         self.btn_ok = ttk.Button(self, text='Добавить')
         self.btn_ok.place(x=10, y=320)
-        self.btn_ok.bind('<Button-1>', lambda event: self.view.records_hall(self.entry_first.get(),
-                                                                            self.entry_second.get(),
-                                                                            self.entry_third.get(),
-                                                                            self.entry_fourth.get(),
-                                                                            self.entry_fifth.get(),
+        self.btn_ok.bind('<Button-1>', lambda event: self.view.records_hall(self.combobox_first.get(),
+                                                                            self.combobox_second.get(),
+                                                                            self.combobox_third.get(),
+                                                                            self.combobox_fourth.get(),
+                                                                            self.combobox_fifth.get(),
                                                                             ))
         self.grab_set()
         self.focus_set()
 
+
+class UpdateHall(AddHall):
+    def __init__(self):
+        super().__init__()
+        self.init_hall_upd()
+        self.view = app
+
+    def init_hall_upd(self):
+        self.btn_ok.bind('<Button-1>', lambda event: self.view.update_record_hall(self.combobox_first.get(),
+                                                                                  self.combobox_second.get(),
+                                                                                  self.combobox_third.get(),
+                                                                                  self.combobox_fourth.get(),
+                                                                                  self.combobox_fifth.get(),
+                                                                                  ))
+
+class CheckFilm(tk.Toplevel):
+    def __init__(self):
+        super().__init__(root)
+        self.dbFilms = dbFilms
+        self.init_check()
+        self.view = app
+
+    def init_check(self):
+        self.title('Выбрать фильм')
+        self.geometry('200x100')
+        self.resizable(False, False)
+
+        self.dbFilms.c.execute('''SELECT Title FROM Films''')
+        self.combobox_film = ttk.Combobox(self, values=[row for row in self.dbFilms.c.fetchall()])
+        self.combobox_film.current(0)
+        self.combobox_film.place(x=10, y=10)
+
+        btn_cancel = ttk.Button(self, text='Закрыть', command=self.destroy)
+        btn_cancel.place(x=100, y=50)
+
+        self.btn_ok = ttk.Button(self, text='Добавить')
+        self.btn_ok.place(x=10, y=50)
+        self.btn_ok.bind('<Button-1>', lambda event: print(self.combobox_film.get()))
+        self.grab_set()
+        self.focus_set()
 
 if __name__ == "__main__":
     root = tk.Tk()

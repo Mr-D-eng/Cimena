@@ -40,14 +40,16 @@ class DbHall:
     def __init__(self):
         self.conn = sqlite3.connect('DataBase.bd')
         self.c = self.conn.cursor()
-        self.c.execute(
-            '''CREATE TABLE IF NOT EXISTS Hall(id integer primary key, FirstColumn text, SecondColumn text, 
-            ThirdColumn text, FourthColumn text, FifthColumn text)''')
+        Titles = self.c.execute('''SELECT Title FROM Films''')
+        for Title in Titles:
+            self.c.execute(
+                    f'''CREATE TABLE IF NOT EXISTS "{Title}"(id integer primary key, FirstColumn text, SecondColumn text, 
+                    ThirdColumn text, FourthColumn text, FifthColumn text)''')
         self.conn.commit()
 
     def insert_data(self, FirstColumn, SecondColumn, ThirdColumn, FourthColumn, FifthColumn):
         self.c.execute(
-            '''INSERT INTO Hall(FirstColumn, SecondColumn, ThirdColumn, FourthColumn, FifthColumn)
+            f'''INSERT INTO "{Title}"(FirstColumn, SecondColumn, ThirdColumn, FourthColumn, FifthColumn)
             VALUES (?, ?, ?, ?, ?)''',
             (FirstColumn, SecondColumn, ThirdColumn, FourthColumn, FifthColumn)
         )
