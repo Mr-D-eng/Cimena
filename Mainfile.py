@@ -183,12 +183,12 @@ class Main(tk.Frame):
         [self.sessions.insert('', 'end', values=row) for row in self.dbSessions.c.fetchall()]
 
     def update_record_session(self, Title, Date, Time, Tickets, Tickets_sold_out):
-        self.dbSessions.c.execute(f'''UPDATE Films SET Title=?, Date=?, Time=?, Tickets=?, Tickets_sold_out=? WHERE ID=?''',
+        self.dbSessions.c.execute('''UPDATE Sessions SET Title=?, Date=?, Time=?, Tickets=?, Tickets_sold_out=? WHERE ID=?''',
                               (Title, Date, Time, Tickets, Tickets_sold_out,
                                self.sessions.set(self.sessions.selection()[0], '#1'))
                               )
         self.dbSessions.conn.commit()
-        self.view_records_film()
+        self.view_records_session()
 
     def delete_session(self):
         for selected_item in self.sessions.selection():
