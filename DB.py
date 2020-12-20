@@ -9,6 +9,7 @@ class DbFilms:
             '''CREATE TABLE IF NOT EXISTS Films(id integer primary key, Title text, Genre text, Age text, Description 
             text, Visual text)''')
         self.conn.commit()
+        self.createhall()
 
     def insert_data(self, Title, Genre, Age, Description, Visual):
         self.c.execute(
@@ -17,7 +18,16 @@ class DbFilms:
             (Title, Genre, Age, Description, Visual)
         )
         self.conn.commit()
+        self.createhall()
 
+    def createhall(self):
+        self.c.execute('''SELECT Title FROM Films''')
+        for Title in self.c.fetchall():
+            Name = str(Title)[2:-3]
+            self.c.execute(
+                f'''CREATE TABLE IF NOT EXISTS "{Name}"(id integer primary key, FirstColumn text, SecondColumn text, 
+                               ThirdColumn text, FourthColumn text, FifthColumn text)''')
+        self.conn.commit()
 
 class DbSessions:
     def __init__(self):
@@ -40,14 +50,8 @@ class DbHall:
     def __init__(self):
         self.conn = sqlite3.connect('DataBase.bd')
         self.c = self.conn.cursor()
-        Titles = self.c.execute('''SELECT Title FROM Films''')
-        for Title in Titles:
-            self.c.execute(
-                    f'''CREATE TABLE IF NOT EXISTS "{Title}"(id integer primary key, FirstColumn text, SecondColumn text, 
-                    ThirdColumn text, FourthColumn text, FifthColumn text)''')
-        self.conn.commit()
 
-    def insert_data(self, FirstColumn, SecondColumn, ThirdColumn, FourthColumn, FifthColumn):
+    def insert_data(self, Title, FirstColumn, SecondColumn, ThirdColumn, FourthColumn, FifthColumn):
         self.c.execute(
             f'''INSERT INTO "{Title}"(FirstColumn, SecondColumn, ThirdColumn, FourthColumn, FifthColumn)
             VALUES (?, ?, ?, ?, ?)''',

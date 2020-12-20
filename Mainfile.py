@@ -4,6 +4,7 @@ import sys
 from DB import DbFilms, DbSessions, DbHall
 from Cal import *
 import tkinter as tk
+import sqlite3
 
 
 class Main(tk.Frame):
@@ -48,12 +49,13 @@ class Main(tk.Frame):
 
         self.btn_add = tk.Button(self, text='Добавить', command=self.add_film, compound=tk.BOTTOM)
         self.btn_delete = tk.Button(self, text='Удалить', command=self.delete_film, compound=tk.BOTTOM)
+        self.btn_upd = tk.Button(self, text='Изменить', command=self.update_film, compound=tk.BOTTOM)
         self.btn_exit = tk.Button(self, text='Выход', command=root.destroy, background='red', compound=tk.BOTTOM)
 
         self.btn_add.grid(row=1, column=0)
         self.btn_delete.grid(row=1, column=1)
+        self.btn_upd.grid(row=1, column=2)
         self.btn_exit.grid(row=1, column=3)
-
 
     def table_sessions(self):
         self.sessions = ttk.Treeview(self,
@@ -78,13 +80,15 @@ class Main(tk.Frame):
         self.sessions.grid(row=0, column=0, columnspan=4)
         self.view_records_session()
 
-        self.btn_add_drug = tk.Button(self, text='Добавить', command=self.add_session, compound=tk.BOTTOM)
-        self.btn_delete_drug = tk.Button(self, text='Удалить', command=self.delete_session, compound=tk.BOTTOM)
+        self.btn_add_session = tk.Button(self, text='Добавить', command=self.add_session, compound=tk.BOTTOM)
+        self.btn_delete_session = tk.Button(self, text='Удалить', command=self.delete_session, compound=tk.BOTTOM)
+        self.btn_upd = tk.Button(self, text='Изменить', command=self.update_session, compound=tk.BOTTOM)
 
-        self.btn_add_drug.grid(row=1, column=0)
-        self.btn_delete_drug.grid(row=1, column=1)
+        self.btn_add_session.grid(row=1, column=0)
+        self.btn_delete_session.grid(row=1, column=1)
+        self.btn_upd.grid(row=1, column=2)
 
-    def table_hall(self):
+    def table_hall(self, Title):
         self.hall = ttk.Treeview(self,
                                  columns=('ID', 'FirstColumn', 'SecondColumn', 'ThirdColumn', 'FourthColumn', 'FifthColumn'),
                                  height=15,
@@ -105,42 +109,45 @@ class Main(tk.Frame):
         self.hall.heading('FifthColumn', text='5 Место')
 
         self.hall.grid(row=0, column=0, columnspan=4)
-        self.view_records_hall()
+        self.view_records_hall(Title)
+        self.title = Title
 
         self.btn_add = tk.Button(self, text='Добавить', command=self.add_hall, compound=tk.BOTTOM)
-        self.btn_upd = tk.Button(self, text='Редактировать', command=self.update_hall, compound=tk.BOTTOM)
         self.btn_delete = tk.Button(self, text='Удалить', command=self.delete_hall, compound=tk.BOTTOM)
+        self.btn_upd = tk.Button(self, text='Изменить', command=self.update_hall, compound=tk.BOTTOM)
 
         self.btn_add.grid(row=1, column=0)
         self.btn_delete.grid(row=1, column=1)
         self.btn_upd.grid(row=1, column=2)
-    '''Зрительские залы'''
 
     def records_hall(self, FirstColumn, SecondColumn, ThirdColumn, FourthColumn, FifthColumn):
-        self.dbHall.insert_data(FirstColumn, SecondColumn, ThirdColumn, FourthColumn, FifthColumn)
-        self.view_records_hall()
+        self.dbHall.insert_data(self.title, FirstColumn, SecondColumn, ThirdColumn, FourthColumn, FifthColumn)
+        self.view_records_hall(self.title)
 
     def update_record_hall(self, FirstColumn, SecondColumn, ThirdColumn, FourthColumn, FifthColumn):
-        self.dbHall.c.execute('''UPDATE Hall SET FirstColumn=?, SecondColumn=?, ThirdColumn=?, FourthColumn=?, FifthColumn=? WHERE ID=?''',
-                               (FirstColumn, SecondColumn, ThirdColumn, FourthColumn, FifthColumn,
-                                self.hall.set(self.hall.selection()[0], '#1'))
-                               )
+        self.conn = sqlite3.connect('DataBase.bd')
+        self.c = self.conn.cursor()
+        self.dbHall.c.execute(f'''UPDATE "{self.title}" SET FirstColumn=?, SecondColumn=?, ThirdColumn=?, FourthColumn=?, FifthColumn=? WHERE ID=?''',
+                              (FirstColumn, SecondColumn, ThirdColumn, FourthColumn, FifthColumn,
+                               self.hall.set(self.hall.selection()[0], '#1'))
+                              )
         self.dbHall.conn.commit()
-        self.view_records_hall()
+        self.view_records_hall(self.title)
 
-    def view_records_hall(self):
-        self.dbHall.c.execute('''SELECT * FROM Hall''')
+    def view_records_hall(self, Title):
+        self.dbHall.c.execute(f'''SELECT * FROM "{Title}"''')
         [self.hall.delete(i) for i in self.hall.get_children()]
         [self.hall.insert('', 'end', values=row) for row in self.dbHall.c.fetchall()]
 
     def delete_hall(self):
         for selected_item in self.hall.selection():
-            self.dbHall.c.execute("DELETE FROM Hall WHERE ID=?", (self.hall.set(selected_item, '#1'),))
+            self.dbHall.c.execute(f'''DELETE FROM "{self.title}" WHERE ID=?''', (self.hall.set(selected_item, '#1'),))
             self.dbHall.conn.commit()
             self.hall.delete(selected_item)
-        self.view_records_hall()
+        self.view_records_hall(self.title)
 
-    '''Фильмы'''
+    def records_check(self, Title):
+        self.table_hall(Title)
 
     def records_film(self, Title, Genre, Age, Description, Visual):
         self.dbFilms.insert_data(Title, Genre, Age, Description, Visual)
@@ -151,14 +158,20 @@ class Main(tk.Frame):
         [self.films.delete(i) for i in self.films.get_children()]
         [self.films.insert('', 'end', values=row) for row in self.dbFilms.c.fetchall()]
 
+    def update_record_film(self, Genre, Age, Description, Visual):
+        self.dbFilms.c.execute(f'''UPDATE Films SET Genre=?, Age=?, Description=?, Visual=? WHERE ID=?''',
+                              (Genre, Age, Description, Visual,
+                               self.films.set(self.films.selection()[0], '#1'))
+                              )
+        self.dbFilms.conn.commit()
+        self.view_records_film()
+
     def delete_film(self):
         for selected_item in self.films.selection():
             self.dbFilms.c.execute("DELETE FROM Films WHERE ID=?", (self.films.set(selected_item, '#1'),))
             self.dbFilms.conn.commit()
             self.films.delete(selected_item)
         self.view_records_film()
-
-    '''Сеансы'''
 
     def records_session(self, Title, Date, Time, Tickets, Tickets_sold_out):
         self.dbSessions.insert_data(Title, Date, Time, Tickets, Tickets_sold_out)
@@ -168,6 +181,14 @@ class Main(tk.Frame):
         self.dbSessions.c.execute('''SELECT * FROM Sessions''')
         [self.sessions.delete(i) for i in self.sessions.get_children()]
         [self.sessions.insert('', 'end', values=row) for row in self.dbSessions.c.fetchall()]
+
+    def update_record_session(self, Title, Date, Time, Tickets, Tickets_sold_out):
+        self.dbSessions.c.execute(f'''UPDATE Films SET Title=?, Date=?, Time=?, Tickets=?, Tickets_sold_out=? WHERE ID=?''',
+                              (Title, Date, Time, Tickets, Tickets_sold_out,
+                               self.sessions.set(self.sessions.selection()[0], '#1'))
+                              )
+        self.dbSessions.conn.commit()
+        self.view_records_film()
 
     def delete_session(self):
         for selected_item in self.sessions.selection():
@@ -191,6 +212,14 @@ class Main(tk.Frame):
     @staticmethod
     def update_hall():
         UpdateHall()
+
+    @staticmethod
+    def update_film():
+        UpdateFilm()
+
+    @staticmethod
+    def update_session():
+        UpdateSession()
 
     @staticmethod
     def check_film():
@@ -277,8 +306,8 @@ class AddFilm(tk.Toplevel):
         self.geometry('450x350+400+300')
         self.resizable(False, False)
 
-        label_title = tk.Label(self, text='Название:')
-        label_title.place(x=50, y=10)
+        self.label_title = tk.Label(self, text='Название:')
+        self.label_title.place(x=50, y=10)
         label_genre = tk.Label(self, text='Жанр:')
         label_genre.place(x=50, y=40)
         label_age = tk.Label(self, text='Возраст:')
@@ -381,6 +410,39 @@ class UpdateHall(AddHall):
                                                                                   self.combobox_fifth.get(),
                                                                                   ))
 
+
+class UpdateFilm(AddFilm):
+    def __init__(self):
+        super().__init__()
+        self.init_hall_upd()
+        self.view = app
+
+    def init_hall_upd(self):
+        self.entry_title.destroy()
+        self.label_title.destroy()
+
+        self.btn_ok.bind('<Button-1>', lambda event: self.view.update_record_film(self.entry_genre.get(),
+                                                                                  self.entry_age.get(),
+                                                                                  self.entry_description.get(),
+                                                                                  self.combobox_visual.get(),
+                                                                                  ))
+
+
+class UpdateSession(AddSession):
+    def __init__(self):
+        super().__init__()
+        self.init_hall_upd()
+        self.view = app
+
+    def init_hall_upd(self):
+        self.btn_ok.bind('<Button-1>', lambda event: self.view.update_record_session(self.combobox_title.get(),
+                                                                                     self.date[:10],
+                                                                                     self.entry_time.get(),
+                                                                                     self.entry_tickets.get(),
+                                                                                     self.entry_sold_out.get(),
+                                                                                     ))
+
+
 class CheckFilm(tk.Toplevel):
     def __init__(self):
         super().__init__(root)
@@ -401,9 +463,9 @@ class CheckFilm(tk.Toplevel):
         btn_cancel = ttk.Button(self, text='Закрыть', command=self.destroy)
         btn_cancel.place(x=100, y=50)
 
-        self.btn_ok = ttk.Button(self, text='Добавить')
+        self.btn_ok = ttk.Button(self, text='Просмотр')
         self.btn_ok.place(x=10, y=50)
-        self.btn_ok.bind('<Button-1>', lambda event: print(self.combobox_film.get()))
+        self.btn_ok.bind('<Button-1>', lambda event: self.view.records_check(self.combobox_film.get()))
         self.grab_set()
         self.focus_set()
 
