@@ -9,56 +9,20 @@ import tkinter as tk
 class Main(tk.Frame):
     def __init__(self, root):
         super().__init__(root)
-        self.table()
         self.dbFilms = dbFilms
         self.dbSessions = dbSessions
         self.dbHall = dbHall
+        self.table()
         self.view_records_film()
 
     def table(self):
-        if films:
-            
-        self.films = ttk.Treeview(self,
-                                  columns=('ID', 'Title', 'Genre', 'Age', 'Description', 'Visual'),
-                                  height=15,
-                                  show='headings'
-                                  )
-        self.films.column('ID', width=30, anchor=tk.CENTER)
-        self.films.column('Title', width=250, anchor=tk.CENTER)
-        self.films.column('Genre', width=50, anchor=tk.CENTER)
-        self.films.column('Age', width=200, anchor=tk.CENTER)
-        self.films.column('Description', width=250, anchor=tk.CENTER)
-        self.films.column('Visual', width=250, anchor=tk.CENTER)
-
-        self.films.heading('ID', text='ID')
-        self.films.heading('Title', text='Название')
-        self.films.heading('Genre', text='Жанр')
-        self.films.heading('Age', text='Возраст')
-        self.films.heading('Description', text='Описание')
-        self.films.heading('Visual', text='2D/3D')
-
-        self.films.pack()
         m = Menu(root)
         root.config(menu=m)
         sm = Menu(m)
         m.add_cascade(label="Опции", menu=sm)
         sm.add_command(label="Сеансы", command=self.table_sessions)
+        sm.add_command(label="Фильмы", command=self.table)
         sm.add_command(label="Зал", command=self.table_hall)
-
-        self.btn_add = tk.Button(self, text='Добавить', command=self.open_dialog, compound=tk.BOTTOM)
-        self.btn_delete = tk.Button(self, text='Удалить', command=self.delete_film, compound=tk.BOTTOM)
-        self.btn_exit = tk.Button(self, text='Выход', command=root.destroy, background='red', compound=tk.BOTTOM)
-
-        self.btn_add.pack(side=tk.LEFT)
-        self.btn_delete.pack(side=tk.LEFT)
-        self.btn_exit.pack(side=tk.RIGHT)
-
-
-    def table_films(self):
-        self.sessions.destroy()
-        self.btn_add_drug.destroy()
-        self.btn_delete_drug.destroy()
-        self.btn_exit_drug.destroy()
 
         self.films = ttk.Treeview(self,
                                   columns=('ID', 'Title', 'Genre', 'Age', 'Description', 'Visual'),
@@ -79,40 +43,29 @@ class Main(tk.Frame):
         self.films.heading('Description', text='Описание')
         self.films.heading('Visual', text='2D/3D')
 
-        self.films.pack()
+        self.films.grid(row=0, column=0, columnspan=3)
         self.view_records_film()
 
-        m = Menu(root)
-        root.config(menu=m)
-        sm = Menu(m)
-        m.add_cascade(label="Опции", menu=sm)
-        sm.add_command(label="Сеансы", command=self.table_sessions)
-        sm.add_command(label="Зал", command=self.table_hall)
-
-        self.btn_add = tk.Button(self, text='Добавить', command=self.open_dialog, compound=tk.BOTTOM)
+        self.btn_add = tk.Button(self, text='Добавить', command=self.add_film, compound=tk.BOTTOM)
         self.btn_delete = tk.Button(self, text='Удалить', command=self.delete_film, compound=tk.BOTTOM)
         self.btn_exit = tk.Button(self, text='Выход', command=root.destroy, background='red', compound=tk.BOTTOM)
 
-        self.btn_add.pack(side=tk.LEFT)
-        self.btn_delete.pack(side=tk.LEFT)
-        self.btn_exit.pack(side=tk.RIGHT)
+        self.btn_add.grid(row=1, column=0)
+        self.btn_delete.grid(row=1, column=1)
+        self.btn_exit.grid(row=1, column=2)
+
 
     def table_sessions(self):
-        self.films.destroy()
-        self.btn_add.destroy()
-        self.btn_delete.destroy()
-        self.btn_exit.destroy()
-
         self.sessions = ttk.Treeview(self,
                                      columns=('ID', 'Title', 'Date', 'Time', 'Tickets', 'Tickets_sold_out'),
                                      height=15,
                                      show='headings'
                                      )
         self.sessions.column('ID', width=30, anchor=tk.CENTER)
-        self.sessions.column('Title', width=150, anchor=tk.CENTER)
+        self.sessions.column('Title', width=250, anchor=tk.CENTER)
         self.sessions.column('Date', width=200, anchor=tk.CENTER)
         self.sessions.column('Time', width=200, anchor=tk.CENTER)
-        self.sessions.column('Tickets', width=200, anchor=tk.CENTER)
+        self.sessions.column('Tickets', width=150, anchor=tk.CENTER)
         self.sessions.column('Tickets_sold_out', width=200, anchor=tk.CENTER)
 
         self.sessions.heading('ID', text='ID')
@@ -122,25 +75,14 @@ class Main(tk.Frame):
         self.sessions.heading('Tickets', text='Билетов всего')
         self.sessions.heading('Tickets_sold_out', text='Билетов продано')
 
-        self.sessions.pack()
-
+        self.sessions.grid(row=0, column=0, columnspan=3)
         self.view_records_session()
 
-        m = Menu(root)
-        root.config(menu=m)
-        sm = Menu(m)
-        m.add_cascade(label="Опции", menu=sm)
-        sm.add_command(label="Фильмы", command=self.table_films)
-        sm.add_command(label="Зал", command=self.table_hall)
-
-        self.btn_add_drug = tk.Button(self, text='Добавить', command=self.open_drugs, compound=tk.BOTTOM)
+        self.btn_add_drug = tk.Button(self, text='Добавить', command=self.add_session, compound=tk.BOTTOM)
         self.btn_delete_drug = tk.Button(self, text='Удалить', command=self.delete_session, compound=tk.BOTTOM)
-        self.btn_exit_drug = tk.Button(self, text='Выход', command=root.destroy, background='red', compound=tk.BOTTOM)
 
-        self.btn_add_drug.pack(side=tk.LEFT)
-        self.btn_delete_drug.pack(side=tk.LEFT)
-        self.btn_exit_drug.pack(side=tk.RIGHT)
-
+        self.btn_add_drug.grid(row=1, column=0)
+        self.btn_delete_drug.grid(row=1, column=1)
 
     def table_hall(self):
         self.hall = ttk.Treeview(self,
@@ -148,20 +90,19 @@ class Main(tk.Frame):
                                  height=15,
                                  show='headings'
                                  )
-        self.hall.column('FirstColumn', width=200, anchor=tk.CENTER)
-        self.hall.column('SecondColumn', width=200, anchor=tk.CENTER)
-        self.hall.column('ThirdColumn', width=200, anchor=tk.CENTER)
-        self.hall.column('FourthColumn', width=200, anchor=tk.CENTER)
-        self.hall.column('FifthColumn', width=200, anchor=tk.CENTER)
-        self.hall.pack()
+        self.hall.column('FirstColumn', width=205, anchor=tk.CENTER)
+        self.hall.column('SecondColumn', width=205, anchor=tk.CENTER)
+        self.hall.column('ThirdColumn', width=205, anchor=tk.CENTER)
+        self.hall.column('FourthColumn', width=205, anchor=tk.CENTER)
+        self.hall.column('FifthColumn', width=205, anchor=tk.CENTER)
+        self.hall.grid(row=0, column=0, columnspan=3)
 
         self.btn_add = tk.Button(self, text='Добавить', command=self.add_hall, compound=tk.BOTTOM)
         self.btn_delete = tk.Button(self, text='Удалить', command=self.delete_hall, compound=tk.BOTTOM)
-        self.btn_exit = tk.Button(self, text='Выход', command=root.destroy, background='red', compound=tk.BOTTOM)
 
-        self.btn_add.pack(side=tk.LEFT)
-        self.btn_delete.pack(side=tk.LEFT)
-        self.btn_exit.pack(side=tk.RIGHT)
+        self.btn_add.grid(row=1, column=0)
+        self.btn_delete.grid(row=1, column=1)
+    '''Зрительские залы'''
 
     def records_hall(self, FirstColumn, SecondColumn, ThirdColumn, FourthColumn, FifthColumn):
         self.dbHall.insert_data(FirstColumn, SecondColumn, ThirdColumn, FourthColumn, FifthColumn)
@@ -187,18 +128,10 @@ class Main(tk.Frame):
             self.hall.delete(selected_item)
         self.view_records_hall()
 
-
+    '''Фильмы'''
 
     def records_film(self, Title, Genre, Age, Description, Visual):
         self.dbFilms.insert_data(Title, Genre, Age, Description, Visual)
-        self.view_records_film()
-
-    def update_record_film(self, Title, Genre, Age, Description, Visual):
-        self.dbFilms.c.execute('''UPDATE Films SET Title=?, Genre=?, Age=?, Description=?, Visual=? WHERE ID=?''',
-                               (Title, Genre, Age, Description, Visual,
-                                self.films.set(self.films.selection()[0], '#1'))
-                               )
-        self.dbFilms.conn.commit()
         self.view_records_film()
 
     def view_records_film(self):
@@ -213,18 +146,10 @@ class Main(tk.Frame):
             self.films.delete(selected_item)
         self.view_records_film()
 
+    '''Сеансы'''
+
     def records_session(self, Title, Date, Time, Tickets, Tickets_sold_out):
         self.dbSessions.insert_data(Title, Date, Time, Tickets, Tickets_sold_out)
-        self.view_records_session()
-
-    def update_record_session(self, Title, Date, Time, Tickets, Tickets_sold_out):
-        self.dbSessions.c.execute('''UPDATE Sessions 
-                                    SET Title=?, Date=?, Time=?, Tickets=?, Tickets_sold_out=? WHERE ID=?''',
-                                  (Title, Date, Time, Tickets, Tickets_sold_out,
-                                   self.sessions.set(self.sessions.selection()[0], '#1')
-                                   )
-                                  )
-        self.dbSessions.conn.commit()
         self.view_records_session()
 
     def view_records_session(self):
@@ -240,11 +165,11 @@ class Main(tk.Frame):
         self.view_records_session()
 
     @staticmethod
-    def open_dialog():
+    def add_film():
         AddFilm()
 
     @staticmethod
-    def open_drugs():
+    def add_session():
         AddSession()
 
     @staticmethod
@@ -426,7 +351,7 @@ if __name__ == "__main__":
     dbSessions = DbSessions()
     dbHall = DbHall()
     app = Main(root)
-    app.pack()
+    app.grid()
     root.title("Кинотеатр")
     root.resizable(False, False)
     root.mainloop()
