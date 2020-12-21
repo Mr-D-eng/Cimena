@@ -1,10 +1,11 @@
+import sqlite3
+import tkinter as tk
 import tkinter.font
 from tkinter import *
-import sys
-from DB import DbFilms, DbSessions, DbHall
+from tkinter import ttk
+
 from Cal import *
-import tkinter as tk
-import sqlite3
+from DB import DbFilms, DbSessions, DbHall
 
 
 class Main(tk.Frame):
@@ -90,7 +91,8 @@ class Main(tk.Frame):
 
     def table_hall(self, Title):
         self.hall = ttk.Treeview(self,
-                                 columns=('ID', 'FirstColumn', 'SecondColumn', 'ThirdColumn', 'FourthColumn', 'FifthColumn'),
+                                 columns=(
+                                 'ID', 'FirstColumn', 'SecondColumn', 'ThirdColumn', 'FourthColumn', 'FifthColumn'),
                                  height=15,
                                  show='headings'
                                  )
@@ -127,10 +129,11 @@ class Main(tk.Frame):
     def update_record_hall(self, FirstColumn, SecondColumn, ThirdColumn, FourthColumn, FifthColumn):
         self.conn = sqlite3.connect('DataBase.bd')
         self.c = self.conn.cursor()
-        self.dbHall.c.execute(f'''UPDATE "{self.title}" SET FirstColumn=?, SecondColumn=?, ThirdColumn=?, FourthColumn=?, FifthColumn=? WHERE ID=?''',
-                              (FirstColumn, SecondColumn, ThirdColumn, FourthColumn, FifthColumn,
-                               self.hall.set(self.hall.selection()[0], '#1'))
-                              )
+        self.dbHall.c.execute(
+            f'''UPDATE "{self.title}" SET FirstColumn=?, SecondColumn=?, ThirdColumn=?, FourthColumn=?, FifthColumn=? WHERE ID=?''',
+            (FirstColumn, SecondColumn, ThirdColumn, FourthColumn, FifthColumn,
+             self.hall.set(self.hall.selection()[0], '#1'))
+            )
         self.dbHall.conn.commit()
         self.view_records_hall(self.title)
 
@@ -160,9 +163,9 @@ class Main(tk.Frame):
 
     def update_record_film(self, Genre, Age, Description, Visual):
         self.dbFilms.c.execute(f'''UPDATE Films SET Genre=?, Age=?, Description=?, Visual=? WHERE ID=?''',
-                              (Genre, Age, Description, Visual,
-                               self.films.set(self.films.selection()[0], '#1'))
-                              )
+                               (Genre, Age, Description, Visual,
+                                self.films.set(self.films.selection()[0], '#1'))
+                               )
         self.dbFilms.conn.commit()
         self.view_records_film()
 
@@ -183,16 +186,22 @@ class Main(tk.Frame):
         [self.sessions.insert('', 'end', values=row) for row in self.dbSessions.c.fetchall()]
 
     def update_record_session(self, Title, Date, Time, Tickets, Tickets_sold_out):
-        self.dbSessions.c.execute('''UPDATE Sessions SET Title=?, Date=?, Time=?, Tickets=?, Tickets_sold_out=? WHERE ID=?''',
-                              (Title, Date, Time, Tickets, Tickets_sold_out,
-                               self.sessions.set(self.sessions.selection()[0], '#1'))
-                              )
+        self.dbSessions.c.execute(
+            '''UPDATE Sessions SET Title=?, Date=?, Time=?, Tickets=?, Tickets_sold_out=? WHERE ID=?''',
+            (Title, Date, Time, Tickets, Tickets_sold_out,
+             self.sessions.set(self.sessions.selection()[0], '#1'))
+            )
         self.dbSessions.conn.commit()
         self.view_records_session()
 
     def delete_session(self):
         for selected_item in self.sessions.selection():
-            self.dbSessions.c.execute("DELETE FROM Sessions WHERE ID=?", (self.sessions.set(selected_item, '#1'),))
+            name = self.sessions.set(selected_item, '#1')
+            Title_name = self.dbSessions.c.execute('''SELECT Title FROM Sessions WHERE ID=?''', (name))
+            for i in Title_name:
+                self.dbSessions.c.execute(f'''DROP TABLE "{str(i)[2:-3]}";''')
+                self.dbSessions.conn.commit()
+            self.dbSessions.c.execute('''DELETE FROM Sessions WHERE ID=?''', (name))
             self.dbSessions.conn.commit()
             self.sessions.delete(selected_item)
         self.view_records_session()
@@ -343,6 +352,7 @@ class AddFilm(tk.Toplevel):
         self.grab_set()
         self.focus_set()
 
+
 class AddHall(tk.Toplevel):
     def __init__(self):
         super().__init__(root)
@@ -468,6 +478,7 @@ class CheckFilm(tk.Toplevel):
         self.btn_ok.bind('<Button-1>', lambda event: self.view.records_check(self.combobox_film.get()))
         self.grab_set()
         self.focus_set()
+
 
 if __name__ == "__main__":
     root = tk.Tk()
